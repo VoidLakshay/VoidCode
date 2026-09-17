@@ -22,5 +22,4 @@ transporter.verify((err, success) => {
   }
 });
 
-export default
-transporter;
+export default transporter;
