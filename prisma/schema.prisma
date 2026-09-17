@@ -18,6 +18,9 @@ model User {
   createdAt           DateTime       @default(now())
   emailVerifyExpiry   DateTime?
   emailVerifyToken    String?
+  emailVerifyOtpHash   String?
+  emailVerifyOtpExpiry DateTime?
+  emailVerifyOtpAttempts Int @default(0)
   isVerified          Boolean        @default(false)
   photoUrl            String         @default("")
   refreshToken        String?
