@@ -9,7 +9,7 @@ export async function GET(req: Request) {
     if (!token) {
       return Response.json(
         { message: "Invalid or expired token" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -25,7 +25,7 @@ export async function GET(req: Request) {
     if (!user) {
       return Response.json(
         { message: "Invalid or expired token" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -47,9 +47,6 @@ export async function GET(req: Request) {
   } catch (error) {
     console.error("Verification error:", error);
 
-    return Response.json(
-      { message: "Verification failed" },
-      { status: 500 }
-    );
+    return Response.json({ message: "Verification failed" }, { status: 500 });
   }
 }

@@ -2,8 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-   try {
-  const refreshToken = req.cookies.get("refreshToken")?.value;
+  try {
+    const refreshToken = req.cookies.get("refreshToken")?.value;
 
     // REMOVE REFRESH TOKEN FROM DB
 
@@ -19,7 +19,10 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const response = NextResponse.json({ success: true, message: "Signout successful" }, { status: 200 });
+    const response = NextResponse.json(
+      { success: true, message: "Signout successful" },
+      { status: 200 },
+    );
 
     // clear cookies by setting empty value and past expiry
     response.cookies.set("accessToken", "", {
@@ -44,4 +47,4 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ message: "Signout failed" }, { status: 500 });
   }
-};
+}

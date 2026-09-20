@@ -11,7 +11,7 @@ export async function POST(req: Request) {
         {
           message: "Email and OTP are required",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
         {
           message: "User not found",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -37,7 +37,7 @@ export async function POST(req: Request) {
         {
           message: "Email is already verified",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -47,20 +47,17 @@ export async function POST(req: Request) {
         {
           message: "OTP not found. Please request a new OTP.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // 5. Check OTP expiry
-    if (
-      !user.emailVerifyOtpExpiry ||
-      user.emailVerifyOtpExpiry < new Date()
-    ) {
+    if (!user.emailVerifyOtpExpiry || user.emailVerifyOtpExpiry < new Date()) {
       return Response.json(
         {
           message: "OTP has expired. Please request a new OTP.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -70,14 +67,14 @@ export async function POST(req: Request) {
         {
           message: "Too many failed attempts. Please request a new OTP.",
         },
-        { status: 429 }
+        { status: 429 },
       );
     }
 
     // 7. Compare OTP
     const isValidOtp = await bcrypt.compare(
       otp.toString(),
-      user.emailVerifyOtpHash
+      user.emailVerifyOtpHash,
     );
 
     // 8. Invalid OTP
@@ -97,7 +94,7 @@ export async function POST(req: Request) {
         {
           message: "Invalid OTP",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -122,7 +119,7 @@ export async function POST(req: Request) {
         success: true,
         message: "Email verified successfully",
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("OTP verification error:", error);
@@ -131,7 +128,7 @@ export async function POST(req: Request) {
       {
         message: "Internal server error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

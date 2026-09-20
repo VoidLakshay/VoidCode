@@ -22,12 +22,52 @@ model User {
   emailVerifyOtpExpiry DateTime?
   emailVerifyOtpAttempts Int @default(0)
   isVerified          Boolean        @default(false)
-  photoUrl            String         @default("")
+  photoUrl            String?         @default("")
   refreshToken        String?
-  resetOtp            String?
+  resetOtpHash        String?
   resetOtpExpiry      DateTime?
   resetPasswordExpiry DateTime?
   resetPasswordToken  String?
   updatedAt           DateTime       @updatedAt
   userName            String
+  submissions Submission[]
+}
+model Problem {
+  id          String       @id @default(cuid())
+  problemNumber Int        @unique @default(autoincrement())
+  title       String
+  slug        String       @unique
+  description String
+  difficulty  String
+  constraints String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  testCases   TestCase[]
+  submissions Submission[]
+}
+
+model TestCase {
+  id             String  @id @default(cuid())
+  problemId      String
+  input          String
+  expectedOutput String
+  isHidden       Boolean @default(true)
+
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+}
+
+model Submission {
+  id            String   @id @default(cuid())
+  userId        String
+  problemId     String
+  sourceCode    String
+  language      String
+  status        String   @default("QUEUED")
+  verdict       String?
+  executionTime Int?
+  memoryUsed    Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem       Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
 }
