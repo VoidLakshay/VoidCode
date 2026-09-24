@@ -10,7 +10,7 @@ export const generateAccessToken = (payload: TokenPayload) => {
     process.env.ACCESS_TOKEN_SECRET!,
     {
       expiresIn: "15m",
-    }
+    },
   );
 };
 
@@ -20,6 +20,14 @@ export const generateRefreshToken = (payload: TokenPayload) => {
     process.env.REFRESH_TOKEN_SECRET!,
     {
       expiresIn: "7d",
-    }
+    },
   );
+};
+
+// Verify access token
+export const verifyAccessToken = (token: string): TokenPayload => {
+  return jwt.verify(
+    token,
+    process.env.ACCESS_TOKEN_SECRET!,
+  ) as TokenPayload;
 };
