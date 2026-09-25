@@ -136,3 +136,137 @@ export async function POST(req: Request) {
     );
   }
 }
+
+
+export async function GET(req: Request) {
+  try {
+    // 1. Get access token from cookie
+    const token = req.headers
+      .get("cookie")
+      ?.split("; ")
+      .find((cookie) => cookie.startsWith("accessToken="))
+      ?.split("=")[1];
+
+    if (!token) {
+      return Response.json(
+        {
+          message: "Unauthorized",
+        },
+        { status: 401 },
+      );
+    }
+
+    // 2. Verify token and get user ID
+    let userId: string;
+
+    try {
+      const payload = verifyAccessToken(token);
+      userId = payload.id;
+    } catch {
+      return Response.json(
+        {
+          message: "Invalid or expired access token",
+        },
+        { status: 401 },
+      );
+    }
+
+    // 3. Get pagination parameters
+    const { searchParams } = new URL(req.url);
+
+    const page = Number(searchParams.get("page") ?? "1");
+    const limit = Number(searchParams.get("limit") ?? "10");
+
+    // 4. Validate pagination parameters
+    if (
+      !Number.isInteger(page) ||
+      !Number.isInteger(limit) ||
+      page < 1 ||
+      limit < 1
+    ) {
+      return Response.json(
+        {
+          message: "Page and limit must be positive integers",
+        },
+        { status: 400 },
+      );
+    }
+
+    // Prevent very large requests
+    const MAX_LIMIT = 50;
+
+    if (limit > MAX_LIMIT) {
+      return Response.json(
+        {
+          message: `Limit cannot exceed ${MAX_LIMIT}`,
+        },
+        { status: 400 },
+      );
+    }
+
+    // 5. Calculate how many records to skip
+    const skip = (page - 1) * limit;
+
+    // 6. Fetch submissions + total count
+    const [submissions, total] = await prisma.$transaction([
+      prisma.submission.findMany({
+        where: {
+          userId,
+        },
+        select: {
+          id: true,
+          problemId: true,
+          language: true,
+          status: true,
+          verdict: true,
+          executionTime: true,
+          memoryUsed: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        skip,
+        take: limit,
+      }),
+
+      prisma.submission.count({
+        where: {
+          userId,
+        },
+      }),
+    ]);
+
+    // 7. Calculate pagination information
+    const totalPages = Math.ceil(total / limit);
+    const hasMore = page < totalPages;
+
+    // 8. Response
+    return Response.json(
+      {
+        message: "Submissions fetched successfully",
+        submissions,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages,
+          hasMore,
+        },
+      },
+      { status: 200 },
+    );
+  } catch (error) {
+    console.error("Fetch submissions error:", error);
+
+    return Response.json(
+      {
+        message: "Internal Server Error",
+      },
+      { status: 500 },
+    );
+  }
+}
+
+
